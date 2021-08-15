@@ -1,18 +1,24 @@
 // @dart=2.9
 import 'dart:html';
 import 'dart:convert';
+import 'package:cubit/cubit.dart';
+import 'package:deai_client/constants.dart';
 import 'package:deai_client/state_management/contract_cubit.dart';
 import 'package:deai_client/state_management/contract_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cubit/flutter_cubit.dart';
 import 'package:flutter_web3_provider/ethereum.dart';
 import 'package:flutter_web3_provider/ethers.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'dart:js_util';
 import 'package:http/http.dart' as http;
 import '../widgets/claim_token.dart';
 
 class Home extends StatefulWidget {
+  final ContractCubit cubit;
+
+  const Home(this.cubit);
   @override
   _HomeState createState() => _HomeState();
 }
@@ -24,123 +30,73 @@ class _HomeState extends State<Home> {
   String selectedAddress;
   bool _walletConnected = false;
   String prediction = "";
-  final _eventUrl = "https://api.poap.xyz/events/id/2533";
-  var eventDetails = {
-    'id': 2533,
-    'name': 'Event Name',
-    'imageUrl': 'https://picsum.photos/250?image=9',
-  };
 
   @override
   void initState() {
-    _getDetails();
     super.initState();
     // CubitProvider.of<ContractCubit>(context).getTasks();
-  }
-
-  Future<String> _getDetails() async {
-    return await http.get(Uri.parse(_eventUrl)).then(
-      (result) {
-        if (result.statusCode == 200) {
-          eventDetails['id'] = jsonDecode(result.body)['id'];
-          eventDetails['name'] = jsonDecode(result.body)['name'];
-          eventDetails['imageUrl'] = jsonDecode(result.body)['image_url'];
-          return 'Success';
-        }
-       
-        
-        },);
-        return 'Failure';
-      }
-
- 
-  
-  
-
-  void _loadDialog() {
-    showDialog<Null>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        content: ClaimToken(
-            eventName: eventDetails['name'],
-            imageUrl: eventDetails['imageUrl']),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: secondaryColor,
           title: Text("Sentiment Analysis"),
           centerTitle: true,
-          actions: [
-            ElevatedButton(
-              child: Text(
-                  _walletConnected ? "Wallet Connected" : "Connect Wallet"),
-              onPressed: () async {
-                if (!_walletConnected) {
-                  var accounts = await promiseToFuture(ethereum
-                      .request(RequestParams(method: 'eth_requestAccounts')));
-                  print(accounts);
-                  String se = ethereum.selectedAddress;
-                  print("selectedAddress: $se");
-                  setState(() {
-                    selectedAddress = se;
-                    _walletConnected = true;
-                  });
-                  var web3 = Web3Provider(ethereum);
-                  CubitProvider.of<ContractCubit>(context).startContract(web3);
-
-                  // NewContractLinking contractLinking = NewContractLinking(web3);
-                  // await contractLinking.initialSetup();
-                  //  print(await contractLinking.getCount());
-                }
-              },
-            )
-          ],
         ),
         body: CubitConsumer<ContractCubit, ContractState>(
-          builder: (context, state) {
-            if (state is IntialState)
-              return Center(child: Text("Connect to the wallet first"));
-            if (state is PredictState) {
-              prediction = state.result == 1 ? "Postive" : "Negative";
-            }
-            
-
-          
-            return buildBody();
-          },
-          listener: (context, state) {
-            if (state is ErrorState) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(state.error),
-              ));
-            
-            }
-           if (state is TrainState) {
-              var result = state.good_or_bad;
-            String mes;
-              if(result == 1){
-                _loadDialog();
-            
-             mes = "Good data submitted. Get ready to receive your poap badges";}
-            else
-              mes = "Bad data submitted";
-ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mes),));}
-          },
-        ));
+            cubit: widget.cubit,
+            builder: (context, state) {
+              if (state is PredictState) {
+                prediction = state.result == 1 ? "Postive" : "Negative";
+              }
+              return buildBody();
+            },
+            listener: (context, state) {
+              if (state is ErrorState) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(state.error),
+                ));
+              }
+              if (state is TrainState) {
+                var result = state.good_or_bad;
+                String mes;
+                if (result == 1) {
+                  mes = "Good data submitted";
+                } else
+                  mes = "Bad data submitted";
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(mes),
+                ));
+              }
+            }));
   }
 
   buildBody() => Container(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Form(
-              child: Column(
-                children: [
-                  Padding(
+        color: bgColor,
+        padding: EdgeInsets.symmetric(vertical: 100,horizontal: 20),
+        child: SingleChildScrollView(
+          child: Form(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text(
+                    "The IMDb Movie Reviews dataset is a binary sentiment analysis dataset consisting of"+
+                    " 50,000 reviews from the Internet Movie Database (IMDb) labeled as positive or negative."+
+                    "The dataset contains an even number of positive and negative reviews."+
+                    " Only highly polarizing reviews are considered",
+                    style: GoogleFonts.nixieOne(
+    textStyle: TextStyle(color: Colors.white60, fontSize: 32)),
+                    ),
+                
+               SizedBox(height: 50),
+                Padding(
+                  padding: const EdgeInsets.only(left:200),
+                  child: Row(
+                    children: [
+                      Container(
+                    width: 800,
                     padding: EdgeInsets.only(top: 29),
                     child: TextFormField(
                       controller: yourNameController,
@@ -151,9 +107,7 @@ ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mes),));}
                           icon: Icon(Icons.drive_file_rename_outline)),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                   SizedBox(width: 100),
                       Padding(
                         padding: EdgeInsets.only(top: 30),
                         child: ElevatedButton(
@@ -161,70 +115,84 @@ ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mes),));}
                             'Get Prediction',
                             style: TextStyle(fontSize: 30),
                           ),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.green,
-                          ),
+                          style:
+                              ElevatedButton.styleFrom(primary: primaryColor),
                           onPressed: () {
-                            CubitProvider.of<ContractCubit>(context)
-                                .predict(yourNameController.text);
+                            widget.cubit.predict(yourNameController.text);
                           },
                         ),
                       ),
-                      SizedBox(width: 40),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 30),
-                        child: Text(prediction,
-                            style: TextStyle(
-                              fontSize: 30,
-                              color: Colors.blue,
-                            )),
-                      )
+                      
                     ],
                   ),
-                  SizedBox(height: 20),
+                ),
+               SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30),
+                      child: Text(prediction,
+                          style: TextStyle(
+                            fontSize: 30,
+                            color: Colors.blue,
+                          )),
+                    ),
+                SizedBox(height: 50),
+                Padding(
+
+                  padding: const EdgeInsets.only(left:200),
+                  child: Row(
+
+                    children: [
+                      Container(
+                        width:800,
+                        padding: EdgeInsets.only(top: 29),
+                        child: TextFormField(
+                          controller: trainController,
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: "Train",
+                              hintText: "Enter the review",
+                              icon: Icon(Icons.drive_file_rename_outline)),
+                        ),
+                      ),
+                       SizedBox(width: 100),
                   Padding(
                     padding: EdgeInsets.only(top: 29),
-                    child: TextFormField(
-                      controller: trainController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: "Train",
-                          hintText: "Enter the review",
-                          icon: Icon(Icons.drive_file_rename_outline)),
-                    ),
-                  ),
-                  ToggleButtons(
-                    children: [
-                      Icon(Icons.thumb_up_outlined),
-                      Icon(Icons.thumb_down_outlined),
-                    ],
-                    isSelected: isSelected,
-                    onPressed: (index) {
-                      setState(() {
-                        isSelected[index] = true;
-                        isSelected[1 - index] = false;
-                      });
-                    },
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 30),
-                    child: ElevatedButton(
-                      child: Text(
-                        'Train',
-                        style: TextStyle(fontSize: 30),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.green,
-                      ),
-                      onPressed: () {
-                        int classificaion = isSelected[0] ? 1 : 0;
-                        CubitProvider.of<ContractCubit>(context)
-                            .train(trainController.text, classificaion);
+                    child: ToggleButtons(
+                      children: [
+                        Icon(Icons.thumb_up_outlined),
+                        Icon(Icons.thumb_down_outlined),
+                      ],
+                      isSelected: isSelected,
+                      onPressed: (index) {
+                        setState(() {
+                          isSelected[index] = true;
+                          isSelected[1 - index] = false;
+                        });
                       },
                     ),
-                  )
-                ],
-              ),
+                  ),
+                  SizedBox(width: 50),
+                Padding(
+                  padding: EdgeInsets.only(top: 30),
+                  child: ElevatedButton(
+                    child: Text(
+                      'Train',
+                      style: TextStyle(fontSize: 30),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: primaryColor,
+                    ),
+                    onPressed: () {
+                      int classificaion = isSelected[0] ? 1 : 0;
+                      widget.cubit.train(trainController.text, classificaion);
+                    },
+                  ),
+                )
+                    ],
+                  ),
+                ),
+                
+              ],
             ),
           ),
         ),

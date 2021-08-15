@@ -37,6 +37,7 @@ class NewContractLinking  {
     var jsonAbi = jsonDecode(abiStringFile);
     _abiCode = jsonEncode(jsonAbi["abi"]);
     _contractAddress =jsonAbi["networks"]["5777"]["address"];
+    print(_contractAddress);
   }
 
  
@@ -93,28 +94,31 @@ class NewContractLinking  {
     var tokens = message.split(" ");
     var encodings=[];
     var hex = [];
-    await tokens.forEach((element)=>encodings.add(int.parse(encoder[element.toLowerCase()].toString()!=null?encoder[element.toLowerCase()].toString():"1337",radix:16)));
-    
+    await tokens.forEach((element)=>encodings.add("0x"+int.parse(encoder[element.toLowerCase()].toString()!=null?encoder[element.toLowerCase()].toString():"1337").toRadixString(16)));
+    print(encodings);
      var result  = promiseToFuture(callMethod(_newContract, "predict", [encodings]));
      int prediction;
     await result.then((value) => prediction = (int.parse(value.toString())));
+    print(prediction);
     return prediction;
   }
 
    train(String message,int classification) async {
-    
+    print(message);
   var _contract = await _newContract.connect(provider.getSigner());
     var encoder = jsonDecode(  await rootBundle.loadString("assets/imdb.json"));
   
     var tokens = message.split(" ");
+    print(tokens);
     var encodings=[];
-    await tokens.forEach((element)=>encodings.add(int.parse(encoder[element.toLowerCase()].toString()!=null?encoder[element.toLowerCase()].toString():"1337",radix:16)));
+    await tokens.forEach((element)=>encodings.add("0x"+int.parse(encoder[element.toLowerCase()].toString()!=null?encoder[element.toLowerCase()].toString():"1337").toRadixString(16)));
     print(encodings);
-      dynamic res = await promiseToFuture(callMethod(_contract, "update", [encodings,classification ]));
-     int val=1;
-    //await res.then((value) => print(int.parse(value.toString())));
+      var res =  promiseToFuture(callMethod(_contract, "update", [encodings,classification]));
+    //  int prediction;
+    // print(res.runtimeType);
+    
    // print(int.parse(res.toString()));
-    return val;
+    return 1;
   }
 
 //  setTask(String message) async {
