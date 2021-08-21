@@ -37,6 +37,7 @@ dependencies:
   web3dart: ^2.1.2
   web_socket_channel: ^2.1.0
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

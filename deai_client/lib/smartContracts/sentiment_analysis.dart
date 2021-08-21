@@ -96,8 +96,10 @@ class NewContractLinking  {
     var hex = [];
     await tokens.forEach((element)=>encodings.add("0x"+int.parse(encoder[element.toLowerCase()].toString()!=null?encoder[element.toLowerCase()].toString():"1337").toRadixString(16)));
     print(encodings);
-     var result  = promiseToFuture(callMethod(_newContract, "predict", [encodings]));
+     var result  =promiseToFuture(callMethod(_newContract, "predict", [encodings]));
      int prediction;
+     var res = await result;
+     print(res);
     await result.then((value) => prediction = (int.parse(value.toString())));
     print(prediction);
     return prediction;
@@ -109,15 +111,19 @@ class NewContractLinking  {
     var encoder = jsonDecode(  await rootBundle.loadString("assets/imdb.json"));
   
     var tokens = message.split(" ");
-    print(tokens);
+    print(classification);
     var encodings=[];
     await tokens.forEach((element)=>encodings.add("0x"+int.parse(encoder[element.toLowerCase()].toString()!=null?encoder[element.toLowerCase()].toString():"1337").toRadixString(16)));
     print(encodings);
-      var res =  promiseToFuture(callMethod(_contract, "update", [encodings,classification]));
-    //  int prediction;
-    // print(res.runtimeType);
-    
-   // print(int.parse(res.toString()));
+      var res = promiseToFuture(callMethod(_contract, "update", [encodings,classification]));
+      final result = await res;
+      print(result.runtimeType);
+    //  if(res is int)
+    //   print("Integer");
+    //   if(res is String)
+    //     print("String");
+    //     if(res is bool)
+    //       print("boolean");
     return 1;
   }
 

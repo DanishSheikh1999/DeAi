@@ -15,7 +15,7 @@ contract SparsePerceptron is Classifier64 {
      * Multiplied by `toFloat`.
      */
     mapping(uint64 => int80) public weights;
-
+    event Trained(uint64 value);
     /**
      * The bias to add to the multiplication of the weights and the data.
      * Multiplied by `toFloat`.
@@ -113,8 +113,11 @@ contract SparsePerceptron is Classifier64 {
                     weights[uint64(data[i])] -= learningRate;
                 }
             }
+            emit Trained(1);
             return 1;
+            
         }
+        emit Trained(0);
         return 0;
     }
 

@@ -118,7 +118,11 @@ class _HomeState extends State<Home> {
                           style:
                               ElevatedButton.styleFrom(primary: primaryColor),
                           onPressed: () {
+
                             widget.cubit.predict(yourNameController.text);
+                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("Your Subscription is valid"),
+                ));
                           },
                         ),
                       ),

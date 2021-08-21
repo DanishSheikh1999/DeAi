@@ -12554,12 +12554,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x40f53086dDF4BC04D86146abc3f0862AfF5f8f7e",
-      "transactionHash": "0xfb83d8ee1d7341455f2e9b1c39fdda752aedafb627c90dc8f10100dc3119bd9a"
+      "address": "0x2BFb9c7b0285a99D7f052bB33a71c8fd17b81747",
+      "transactionHash": "0xd3a6f81eb1ca456017b2ac0dd0be981c3455d60d496d1c19e5f0954e8e74d8ab"
     }
   },
   "schemaVersion": "3.4.1",
-  "updatedAt": "2021-05-30T14:25:39.774Z",
+  "updatedAt": "2021-08-16T13:36:44.946Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {
